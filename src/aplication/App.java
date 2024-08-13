@@ -7,6 +7,8 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -14,6 +16,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.US);
         Scanner sc = new Scanner(System.in);
+        List<Funcionario> lista = new ArrayList<>();
 
         //Pega o user e define o caminho onde arquivo será criado ou lido
         String userHome = System.getProperty("user.home");
@@ -24,10 +27,11 @@ public class App {
             BufferedReader br = new BufferedReader(new FileReader(path))){
             
             Boolean sair = false;
-            
+
             //Controle do menu
             while(sair != true) {
                 menu();
+
                 int opcao = sc.nextInt();
 
                 //Tratamendo para entrada inválida
@@ -42,19 +46,55 @@ public class App {
                         sc.nextLine();
                         //Limpa terminal os linux
                         new ProcessBuilder("clear").inheritIO().start().waitFor();
-                        System.out.println("#####################");
-                        System.out.println("#Cadastrar          #");
-                        System.out.println("#####################\n");
-                        System.out.print("Informe o ID: ");
-                        int idFuncionario = sc.nextInt();
+
+                        //Salva o funcionário no csv
+                        String lineFuncionario = cadastrarFuncionário(lista);
+                        if(lineFuncionario != "Erro") {
+                            bw.write(lineFuncionario);
+                            bw.newLine();
+                            bw.flush();
+                        }
+                        else {
+                            System.out.println("ID existente, tente novamente!");
+                        }
 
                         //Aguarda 2 segundos
                         System.out.println("SALVANDO...");
                         Thread.sleep(2000);
                         break;
 
+                        //Lista funcionário
+                    case 2:
+                        System.out.println();
+
+                        String line = br.readLine();
+
+                        //Faz a varredura no csv e adiciona na lista os funcionários
+                        while(line != null) {
+                            String[] funcionario = line.split(";");
+                            Funcionario func = lista.stream().filter(x -> x.getIdFuncionario() == Integer.parseInt(funcionario[0]))
+                                                .findFirst().orElse(null);
+                            if(func == null) {
+                                lista.add(new Funcionario(Integer.parseInt(funcionario[0]), funcionario[1], 
+                                                funcionario[2], Double.parseDouble(funcionario[3])));
+                            }
+
+                            line = br.readLine();
+                        }
+
+                        //Imprime os funcionários se existir
+                        for(Funcionario func : lista) {
+                            System.out.println(func.getIdFuncionario() +
+                                            ", " + func.getNomeFuncionario() +
+                                            ", " + func.getCargoFuncionario() + 
+                                            ", R$" + func.getSalarioFuncionario());
+                        }
+
+                        Thread.sleep(2000);
+                        break;
+                        
+
                     case 5:
-                        //Aguarda 2 segundos
                         System.out.println("SAINDO...");
                         Thread.sleep(2000);
                         sair = true;
@@ -64,9 +104,11 @@ public class App {
                         break;
                 }
 
-                //Limpa terminal os linux
+                //Limpa terminal OS linux
                 new ProcessBuilder("clear").inheritIO().start().waitFor();
             }
+
+            sc.close();
         }
         catch(IOException e) {
             System.out.println("Erro: " + e.getMessage());
@@ -76,13 +118,44 @@ public class App {
         }
     }
 
-    //Função que impprime menu
+    //Função que imprime menu
     public static void menu() {
         System.out.println("#####################");
         System.out.println("#Sistema de Cadastro#");
         System.out.println("#####################");
         System.out.println("#1 - Cadastrar      #");
+        System.out.println("#2 - Listar         #");
         System.out.println("#5 - Sair           #");
         System.out.print("Informe a opção: ");
+    }
+
+    //Criar funcinário
+    public static String cadastrarFuncionário(List<Funcionario> lista) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("#####################");
+        System.out.println("#Cadastrar          #");
+        System.out.println("#####################\n");
+        System.out.print("Informe o ID: ");
+        int idFuncionario = sc.nextInt();
+        sc.nextLine();
+        System.out.print("Informe o nome: ");
+        String nomeFuncionario = sc.nextLine();
+        System.out.print("Informe o cargo: ");
+        String cargoFuncionario = sc.nextLine();
+        System.out.print("Informe o salário: ");
+        Double salarioFuncionario = sc.nextDouble();
+
+        Funcionario func = lista.stream().filter(x -> x.getIdFuncionario() == idFuncionario)
+                                                .findFirst().orElse(null);
+
+        //Se não existir id igual ao id digitado, cria funcionário
+        if(func == null) {
+            Funcionario funcionario = new Funcionario(idFuncionario, nomeFuncionario, cargoFuncionario, salarioFuncionario);
+            return funcionario.toString();
+        }
+        else {
+            return "Erro";
+        }
     }
 }
