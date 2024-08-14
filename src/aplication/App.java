@@ -18,6 +18,7 @@ public class App {
         Scanner sc = new Scanner(System.in);
         List<Funcionario> lista = new ArrayList<>();
         List<String> listaAtualizar = new ArrayList<>();
+        List<String> listaExcluir = new ArrayList<>();
         List<String> listaNova = new ArrayList<>();
 
         //Pega o user e define o caminho onde arquivo será criado ou lido
@@ -50,7 +51,7 @@ public class App {
                         new ProcessBuilder("clear").inheritIO().start().waitFor();
 
                         //Salva o funcionário no csv
-                        String lineFuncionario = cadastrarFuncionário(lista, listaAtualizar);
+                        String lineFuncionario = cadastrarFuncionário(lista, listaAtualizar, listaExcluir);
                         if(lineFuncionario != "Erro") {
                             bw.write(lineFuncionario);
                             bw.newLine();
@@ -123,6 +124,35 @@ public class App {
                         Thread.sleep(2000);
                        
                         break;
+
+                    case 4: 
+                        new ProcessBuilder("clear").inheritIO().start().waitFor();
+
+                        System.out.print("Informe o id do funcionário: ");
+                        Integer idExcluir = sc.nextInt();
+        
+                        for(String linha : listaExcluir) {
+                            //sc.nextLine();
+                            
+                            String[] funcExcluir = linha.split(";");
+                            System.out.println();
+                            System.out.println((idExcluir != Integer.parseInt(funcExcluir[0]) ? true : false));
+                            if(idExcluir != Integer.parseInt(funcExcluir[0])) {
+                                System.out.println("aaaaaaa");
+                                Funcionario funcionario = new Funcionario(Integer.parseInt(funcExcluir[0]), funcExcluir[1], funcExcluir[2], Double.parseDouble(funcExcluir[3]));
+                                linha = funcionario.toString();
+                                listaNova.add(linha);
+                            }
+                            
+                        }
+
+                        System.out.println(listaNova);
+                        excluirDados(listaNova, path);
+                        listaNova.clear();
+                        Thread.sleep(2000);
+
+                        break;
+
                     case 5:
                         System.out.println("SAINDO...");
                         Thread.sleep(2000);
@@ -156,12 +186,13 @@ public class App {
         System.out.println("#1 - Cadastrar      #");
         System.out.println("#2 - Listar         #");
         System.out.println("#3 - Editar         #");
+        System.out.println("#4 - Excluir        #");
         System.out.println("#5 - Sair           #");
         System.out.print("Informe a opção: ");
     }
 
     //Criar funcinário
-    public static String cadastrarFuncionário(List<Funcionario> lista, List<String> listaAtualizar) {
+    public static String cadastrarFuncionário(List<Funcionario> lista, List<String> listaAtualizar, List<String> listaExcluir) {
         Scanner sc = new Scanner(System.in);
 
         System.out.println("#####################");
@@ -183,7 +214,7 @@ public class App {
         //Se não existir id igual ao id digitado, cria funcionário
         if(func == null) {
             Funcionario funcionario = new Funcionario(idFuncionario, nomeFuncionario, cargoFuncionario, salarioFuncionario);
-            
+            listaExcluir.add(funcionario.toString());
             listaAtualizar.add(funcionario.toString());
             return funcionario.toString();
         }
@@ -194,6 +225,23 @@ public class App {
 
     //Atualizar dados
     public static void atualizarDados(List<String> lista, String path) {
+        try(BufferedWriter bw = new  BufferedWriter(new FileWriter(path))){
+            for(String linha : lista) {
+                bw.write(linha);
+                bw.newLine();
+                bw.flush();
+            }
+        }
+        catch(IOException e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
+        catch(RuntimeException e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
+    }
+
+    //Atualizar dados
+    public static void excluirDados(List<String> lista, String path) {
         try(BufferedWriter bw = new  BufferedWriter(new FileWriter(path))){
             for(String linha : lista) {
                 bw.write(linha);
