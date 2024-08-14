@@ -17,13 +17,15 @@ public class App {
         Locale.setDefault(Locale.US);
         Scanner sc = new Scanner(System.in);
         List<Funcionario> lista = new ArrayList<>();
+        List<String> listaAtualizar = new ArrayList<>();
+        List<String> listaNova = new ArrayList<>();
 
         //Pega o user e define o caminho onde arquivo será criado ou lido
         String userHome = System.getProperty("user.home");
         String path = userHome + "/Documentos/CRUD-csv/src/dado/dados.csv";
         
         //Bloco try criando o objeto de leitura e objeto de escrita, garantindo que irá fechar o arquivo
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(path, true));
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(path, false));
             BufferedReader br = new BufferedReader(new FileReader(path))){
             
             Boolean sair = false;
@@ -48,7 +50,7 @@ public class App {
                         new ProcessBuilder("clear").inheritIO().start().waitFor();
 
                         //Salva o funcionário no csv
-                        String lineFuncionario = cadastrarFuncionário(lista);
+                        String lineFuncionario = cadastrarFuncionário(lista, listaAtualizar);
                         if(lineFuncionario != "Erro") {
                             bw.write(lineFuncionario);
                             bw.newLine();
@@ -71,13 +73,10 @@ public class App {
 
                         //Faz a varredura no csv e adiciona na lista os funcionários
                         while(line != null) {
+
                             String[] funcionario = line.split(";");
-                            Funcionario func = lista.stream().filter(x -> x.getIdFuncionario() == Integer.parseInt(funcionario[0]))
-                                                .findFirst().orElse(null);
-                            if(func == null) {
-                                lista.add(new Funcionario(Integer.parseInt(funcionario[0]), funcionario[1], 
+                            lista.add(new Funcionario(Integer.parseInt(funcionario[0]), funcionario[1], 
                                                 funcionario[2], Double.parseDouble(funcionario[3])));
-                            }
 
                             line = br.readLine();
                         }
@@ -93,12 +92,44 @@ public class App {
                         Thread.sleep(2000);
                         break;
                         
+                    case 3:
+                        new ProcessBuilder("clear").inheritIO().start().waitFor();
 
+                        System.out.print("Informe o id do funcionário: ");
+                        int idEditar = sc.nextInt();
+
+                        for(String linha : listaAtualizar) {
+                            String[] funcEditar = linha.split(";");
+
+                            if(Integer.parseInt(funcEditar[0]) == idEditar) {
+                                sc.nextLine();
+                                System.out.print("Novo cargo: ");
+                                String novoCargo = sc.nextLine();
+                                System.out.print("Novo salário: ");
+                                Double novoSalario = sc.nextDouble();
+
+                                Funcionario funcionario = new Funcionario(Integer.parseInt(funcEditar[0]), funcEditar[1], novoCargo, novoSalario);
+                                linha = funcionario.toString();
+                            }
+                            listaNova.add(linha);
+                        }
+                        
+                        for(String linha : listaNova) {
+                            System.out.println(linha);
+                            bw.write(linha);
+                            bw.newLine();
+                            bw.flush();
+                        }
+
+                        Thread.sleep(2000);
+                       
+                        break;
                     case 5:
                         System.out.println("SAINDO...");
                         Thread.sleep(2000);
                         sair = true;
                         break;
+                        
 
                     default:
                         break;
@@ -125,12 +156,13 @@ public class App {
         System.out.println("#####################");
         System.out.println("#1 - Cadastrar      #");
         System.out.println("#2 - Listar         #");
+        System.out.println("#3 - Editar         #");
         System.out.println("#5 - Sair           #");
         System.out.print("Informe a opção: ");
     }
 
     //Criar funcinário
-    public static String cadastrarFuncionário(List<Funcionario> lista) {
+    public static String cadastrarFuncionário(List<Funcionario> lista, List<String> listaAtualizar) {
         Scanner sc = new Scanner(System.in);
 
         System.out.println("#####################");
@@ -152,6 +184,8 @@ public class App {
         //Se não existir id igual ao id digitado, cria funcionário
         if(func == null) {
             Funcionario funcionario = new Funcionario(idFuncionario, nomeFuncionario, cargoFuncionario, salarioFuncionario);
+            
+            listaAtualizar.add(funcionario.toString());
             return funcionario.toString();
         }
         else {
