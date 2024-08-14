@@ -71,6 +71,8 @@ public class App {
 
                         String line = br.readLine();
 
+                        br.reset();
+
                         //Faz a varredura no csv e adiciona na lista os funcionários
                         while(line != null) {
 
@@ -114,12 +116,7 @@ public class App {
                             listaNova.add(linha);
                         }
                         
-                        for(String linha : listaNova) {
-                            System.out.println(linha);
-                            bw.write(linha);
-                            bw.newLine();
-                            bw.flush();
-                        }
+                        atualizarDados(listaNova, path);
 
                         Thread.sleep(2000);
                        
@@ -190,6 +187,23 @@ public class App {
         }
         else {
             return "Erro";
+        }
+    }
+
+    //Atualizar dados
+    public static void atualizarDados(List<String> lista, String path) {
+        try(BufferedWriter bw = new  BufferedWriter(new FileWriter(path))){
+            for(String linha : lista) {
+                bw.write(linha);
+                bw.newLine();
+                bw.flush();
+            }
+        }
+        catch(IOException e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
+        catch(RuntimeException e) {
+            System.out.println("Erro: " + e.getMessage());
         }
     }
 }
