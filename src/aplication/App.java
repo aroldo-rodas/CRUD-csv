@@ -69,24 +69,28 @@ public class App {
                     case 2:
                         System.out.println();
 
-                        String line = br.readLine();
+                        try(BufferedReader br2 = new BufferedReader(new FileReader(path))){
+                            String line = br2.readLine();
 
-                        //Faz a varredura no csv e adiciona na lista os funcionários
-                        while(line != null) {
+                            //Faz a varredura no csv e adiciona na lista os funcionários
+                            while(line != null) {
 
-                            String[] funcionario = line.split(";");
-                            lista.add(new Funcionario(Integer.parseInt(funcionario[0]), funcionario[1], 
-                                                funcionario[2], Double.parseDouble(funcionario[3])));
+                                String[] funcionario = line.split(";");
+                                lista.add(new Funcionario(Integer.parseInt(funcionario[0]), funcionario[1], 
+                                                    funcionario[2], Double.parseDouble(funcionario[3])));
 
-                            line = br.readLine();
-                        }
+                                line = br2.readLine();
+                            }
 
-                        //Imprime os funcionários se existir
-                        for(Funcionario func : lista) {
-                            System.out.println(func.getIdFuncionario() +
-                                            ", " + func.getNomeFuncionario() +
-                                            ", " + func.getCargoFuncionario() + 
-                                            ", R$" + func.getSalarioFuncionario());
+                            //Imprime os funcionários se existir
+                            for(Funcionario func : lista) {
+                                System.out.println(func.getIdFuncionario() +
+                                                ", " + func.getNomeFuncionario() +
+                                                ", " + func.getCargoFuncionario() + 
+                                                ", R$" + func.getSalarioFuncionario());
+                            }
+
+                            lista.clear();
                         }
 
                         Thread.sleep(2000);
