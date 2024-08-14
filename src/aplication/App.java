@@ -71,8 +71,6 @@ public class App {
 
                         String line = br.readLine();
 
-                        br.reset();
-
                         //Faz a varredura no csv e adiciona na lista os funcionários
                         while(line != null) {
 
@@ -117,7 +115,7 @@ public class App {
                         }
                         
                         atualizarDados(listaNova, path);
-
+                        listaNova.clear();
                         Thread.sleep(2000);
                        
                         break;
